@@ -1,9 +1,11 @@
 from google.cloud import bigquery
 from google.cloud import monitoring_v3
+from google.cloud import container_v1
 import time
+import requests
 
-# Golden Signals metrics
-def golden_signals_demand_based_down_scaling_cpu(project_id) -> None:
+# Golden Signals - Cluster binpacking
+def golden_signals_cluster_binpacking_cpu(project_id) -> None:
     client = monitoring_v3.MetricServiceClient()
     project_name = f"projects/{project_id}"
 
@@ -37,7 +39,7 @@ def golden_signals_demand_based_down_scaling_cpu(project_id) -> None:
     for result in results:
         print(result)
 
-def golden_signals_demand_based_scaling_memory(project_id) -> None:
+def golden_signals_cluster_binpacking_memory(project_id) -> None:
     client = monitoring_v3.MetricServiceClient()
     project_name = f"projects/{project_id}"
 
@@ -62,7 +64,7 @@ def golden_signals_demand_based_scaling_memory(project_id) -> None:
     results = client.list_time_series(
         request={
             "name": project_name,
-            "filter": 'metric.type = "kubernetes.io/node/memory/allocatable_utilization" AND memory_type != non-evictable',
+            "filter": 'metric.type = "kubernetes.io/node/memory/allocatable_utilization" AND metric.label."memory_type" != "non-evictable"',
             "interval": interval,
             "view": monitoring_v3.ListTimeSeriesRequest.TimeSeriesView.FULL,
             "aggregation": aggregation,
@@ -71,6 +73,146 @@ def golden_signals_demand_based_scaling_memory(project_id) -> None:
     for result in results:
         print(result)
 
+# Golden Signals - Workload rightsizing
+def golden_signals_workload_rightizing_cpu(project_id) -> None:
+    client = monitoring_v3.MetricServiceClient()
+    project_name = f"projects/{project_id}"
+
+    now = time.time()
+    seconds = int(now)
+    nanos = int((now - seconds) * 10**9)
+    interval = monitoring_v3.TimeInterval(
+        {
+            "end_time": {"seconds": seconds, "nanos": nanos},
+            "start_time": {"seconds": (seconds - 259200), "nanos": nanos},
+        }
+    )
+    aggregation = monitoring_v3.Aggregation(
+        {
+            "alignment_period": {"seconds": 259200}, 
+            "per_series_aligner": monitoring_v3.Aggregation.Aligner.ALIGN_MEAN,
+            "cross_series_reducer": monitoring_v3.Aggregation.Reducer.REDUCE_PERCENTILE_95,
+            "group_by_fields": [],
+        }
+    )
+
+    results = client.list_time_series(
+        request={
+            "name": project_name,
+            "filter": 'metric.type = "kubernetes.io/container/cpu/request_utilization"',
+            "interval": interval,
+            "view": monitoring_v3.ListTimeSeriesRequest.TimeSeriesView.FULL,
+            "aggregation": aggregation,
+        }
+    )
+    for result in results:
+        print(result)
+
+def golden_signals_workload_rightizing_memory(project_id) -> None:
+    client = monitoring_v3.MetricServiceClient()
+    project_name = f"projects/{project_id}"
+
+    now = time.time()
+    seconds = int(now)
+    nanos = int((now - seconds) * 10**9)
+    interval = monitoring_v3.TimeInterval(
+        {
+            "end_time": {"seconds": seconds, "nanos": nanos},
+            "start_time": {"seconds": (seconds - 259200), "nanos": nanos},
+        }
+    )
+    aggregation = monitoring_v3.Aggregation(
+        {
+            "alignment_period": {"seconds": 259200}, 
+            "per_series_aligner": monitoring_v3.Aggregation.Aligner.ALIGN_MEAN,
+            "cross_series_reducer": monitoring_v3.Aggregation.Reducer.REDUCE_PERCENTILE_95,
+            "group_by_fields": [],
+        }
+    )
+
+    results = client.list_time_series(
+        request={
+            "name": project_name,
+            "filter": 'metric.type = "kubernetes.io/container/memory/request_utilization" AND metric.label."memory_type" != "non-evictable"',
+            "interval": interval,
+            "view": monitoring_v3.ListTimeSeriesRequest.TimeSeriesView.FULL,
+            "aggregation": aggregation,
+        }
+    )
+    for result in results:
+        print(result)
+
+# Golden Signals - Demand based downscaling
+def golden_signals_demand_based_downscaling(project_id) -> None:
+    client = monitoring_v3.MetricServiceClient()
+    project_name = f"projects/{project_id}"
+
+    now = time.time()
+    seconds = int(now)
+    nanos = int((now - seconds) * 10**9)
+    interval = monitoring_v3.TimeInterval(
+        {
+            "end_time": {"seconds": seconds, "nanos": nanos},
+            "start_time": {"seconds": (seconds - 259200), "nanos": nanos},
+        }
+    )
+    aggregation = monitoring_v3.Aggregation(
+        {
+            "alignment_period": {"seconds": 259200}, 
+            "per_series_aligner": monitoring_v3.Aggregation.Aligner.ALIGN_MEAN,
+            "cross_series_reducer": monitoring_v3.Aggregation.Reducer.REDUCE_PERCENTILE_95,
+            "group_by_fields": [],
+        }
+    )
+
+    results = client.list_time_series(
+        request={
+            "name": project_name,
+            "filter": 'metric.type = "kubernetes.io/container/cpu/request_utilization"',
+            "interval": interval,
+            "view": monitoring_v3.ListTimeSeriesRequest.TimeSeriesView.FULL,
+            "aggregation": aggregation,
+        }
+    )
+    for result in results:
+        print(result)
+
+# Golden Signals - Discount group
+def golden_signals_discount_group(project_id) -> None:
+    client = monitoring_v3.MetricServiceClient()
+    project_name = f"projects/{project_id}"
+
+    now = time.time()
+    seconds = int(now)
+    nanos = int((now - seconds) * 10**9)
+    interval = monitoring_v3.TimeInterval(
+        {
+            "end_time": {"seconds": seconds, "nanos": nanos},
+            "start_time": {"seconds": (seconds - 259200), "nanos": nanos},
+        }
+    )
+    aggregation = monitoring_v3.Aggregation(
+        {
+            "alignment_period": {"seconds": 259200}, 
+            "per_series_aligner": monitoring_v3.Aggregation.Aligner.ALIGN_MEAN,
+            "cross_series_reducer": monitoring_v3.Aggregation.Reducer.REDUCE_PERCENTILE_95,
+            "group_by_fields": [],
+        }
+    )
+
+    results = client.list_time_series(
+        request={
+            "name": project_name,
+            "filter": 'metric.type = "kubernetes.io/container/memory/request_utilization" AND metric.label."memory_type" != "non-evictable"',
+            "interval": interval,
+            "view": monitoring_v3.ListTimeSeriesRequest.TimeSeriesView.FULL,
+            "aggregation": aggregation,
+        }
+    )
+    for result in results:
+        print(result)
+
+# Workload recommendations
 def optimization_summary() -> None:
     client = bigquery.Client()
     query_job = client.query(
@@ -154,5 +296,7 @@ def query_workloads_at_risk() -> None:
 
     for row in results:
         print(row.controller_name)
+
+
 if __name__ == "__main__":
-    golden_signals_demand_based_scaling_memory('gke-opt-demo')
+    golden_signals_workload_rightizing_memory('gke-opt-demo')
