@@ -1,6 +1,6 @@
 google-cloud-bigquery
-google-cloud-monitoring
-google-cloud-container
-pick
+google-cloud-asset
 google-cloud-aiplatform
-prettytable
+PyYAML
+Flask
+google-cloud-resource-manager

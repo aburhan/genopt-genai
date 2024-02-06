@@ -1,0 +1,18 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+requests = "*"
+langchain = "*"
+google-cloud-aiplatform = "*"
+pypdf = "*"
+chromadb = "*"
+pyautogen = "*"
+pysqlite3-binary = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.11"
